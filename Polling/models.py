@@ -10,6 +10,7 @@ class User(models.Model):
 
 
 class Poll(models.Model):
+    owner = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     description = models.TextField(max_length=2048, null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=[(st, st.value) for st in PollStatus],
