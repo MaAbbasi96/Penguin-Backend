@@ -1,3 +1,5 @@
+from django.core.mail import send_mail
+
 from Polling.enums import PollStatus
 from Polling.models import Poll, PollOption, User, UserPoll
 
@@ -14,10 +16,13 @@ class PollingServices:
             UserPoll.objects.create(user=user, poll=poll, choices={
                 option: False for option in options
             })
-            self.notify(user)
+        subject = 'Invitation to {} polling'.format(title)
+        message = 'Please participate in the poll {} using your panel!'.format(title)
+        self.notify(users, subject, message)
 
-    def notify(self, user):
-        pass
+    @staticmethod
+    def notify(users, subject, message):
+        send_mail(subject, message, 'info@penguin.com', [user.email for user in users], fail_silently=True)
 
     def finalize_poll(self, poll, option):
         poll.status = PollStatus.CLOSED.value
@@ -26,6 +31,7 @@ class PollingServices:
         PollOption.objects.filter(poll=poll).update(final=False)
         option.final = True
         option.save()
-        for user in users:
-            self.notify(user)
-        print(users)
+        subject = 'Polling {} finished'.format(poll.title)
+        message = 'You can no longer vote on poll {}!'.format(poll.title)
+        self.notify(users, subject, message)
+        # print(users)
