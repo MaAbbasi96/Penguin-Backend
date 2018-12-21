@@ -1,12 +1,13 @@
 from django.conf.urls import url
 
-from Polling.views import PollView
-
+from Polling.views import PollManagementView, PollParticipationView
 
 urlpatterns = [
-    url(r'^(?P<poll_id>\d+)/?', PollView.as_view({'get': 'get_poll'}), name='get-poll'),
-    url(r'^create/?', PollView.as_view({'post': 'create'}), name='create-poll'),
-    url(r'^finalize/(?P<poll_id>\d+)/?', PollView.as_view({'post': 'finalize'}),
+    url(r'^(?P<poll_id>\d+)/?', PollParticipationView.as_view({'get': 'get_poll'}), name='get-poll'),
+    url(r'^created/?', PollManagementView.as_view({'get': 'get_created_polls'}), name='get-created-polls'),
+    url(r'^create/?', PollManagementView.as_view({'post': 'create'}), name='create-poll'),
+    url(r'^finalize/(?P<poll_id>\d+)/?', PollManagementView.as_view({'post': 'finalize'}),
         name='finalize-poll'),
-    url(r'^', PollView.as_view({'get': 'get_poll_list'}), name='get-poll-list'),
+    url(r'^participated/?', PollParticipationView.as_view({'get': 'get_participated_polls'}),
+        name='get-participated-polls'),
 ]
