@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
 from Polling.enums import PollStatus
@@ -21,7 +21,7 @@ class PollManagementView(ViewSet):
         print(username, title, description, options, participants)
         user = get_object_or_404(User, username=username)
         PollingServices().create_poll(title, description, user, options, participants)
-        return Response(status=HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
     def get_created_polls(self, request):
         wrapper = RequestWrapper(request)
@@ -38,7 +38,7 @@ class PollManagementView(ViewSet):
         poll = get_object_or_404(Poll, id=poll_id, owner=user)
         option = get_object_or_404(PollOption, poll=poll, value=option_value)
         PollingServices().finalize_poll(poll, option)
-        return Response(status=HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
 
 class PollParticipationView(ViewSet):
@@ -55,7 +55,9 @@ class PollParticipationView(ViewSet):
         # print(username, poll_id)
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id)
-        get_object_or_404(UserPoll, user=user, poll=poll)
+        user_poll = UserPoll.objects.filter(user=user, poll=poll)
+        if not user_poll and user != poll.owner:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(PollSerializer(poll).data)
 
     def vote(self, request, poll_id):
@@ -70,4 +72,4 @@ class PollParticipationView(ViewSet):
             return Response('Poll is closed', status=HTTP_400_BAD_REQUEST)
         user_poll.choices = options
         user_poll.save()
-        return Response(status=HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
