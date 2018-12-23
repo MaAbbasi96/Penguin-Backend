@@ -66,9 +66,8 @@ class PollParticipationView(ViewSet):
         # print(options, type(options))
         poll = get_object_or_404(Poll, id=poll_id)
         user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
-        final_option = poll.polloption_set.filter(final=True)
-        if not final_option:
-            return Response(HTTP_400_BAD_REQUEST)
+        if poll.status == PollStatus.CLOSED.value:
+            return Response('Poll is closed', status=HTTP_400_BAD_REQUEST)
         user_poll.choices = options
         user_poll.save()
         return Response(status=HTTP_200_OK)
