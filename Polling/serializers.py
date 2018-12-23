@@ -1,11 +1,12 @@
 from rest_framework import serializers
 
-from Polling.models import Poll, PollOption, UserPoll
+from Polling.models import Poll, PollOption, UserPoll, User
 
 
 class PollSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
     final_option = serializers.SerializerMethodField()
+    creator = serializers.SerializerMethodField()
 
     def get_options(self, obj):
         options = {}
@@ -25,6 +26,12 @@ class PollSerializer(serializers.ModelSerializer):
         except PollOption.DoesNotExist:
             return None
 
+    def get_creator(self, obj):
+        try:
+            return User.objects.get(id=obj.owner_id).username
+        except User.DoesNotExist:
+            return None
+
     class Meta:
         model = Poll
-        fields = ('id', 'title', 'description', 'status', 'options', 'final_option')
+        fields = ('id', 'title', 'description', 'status', 'options', 'final_option', 'creator')
