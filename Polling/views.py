@@ -18,7 +18,7 @@ class PollManagementView(ViewSet):
         description = wrapper.get_body_param('description')
         options = wrapper.get_body_param('options')
         participants = wrapper.get_body_param('participants')
-        print(username, title, description, options, participants)
+        # print(username, title, description, options, participants)
         user = get_object_or_404(User, username=username)
         PollingServices().create_poll(title, description, user, options, participants)
         return Response(status=status.HTTP_200_OK)
@@ -69,7 +69,7 @@ class PollParticipationView(ViewSet):
         poll = get_object_or_404(Poll, id=poll_id)
         user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
         if poll.status == PollStatus.CLOSED.value:
-            return Response('Poll is closed', status=HTTP_400_BAD_REQUEST)
+            return Response('Poll is closed', status=status.HTTP_400_BAD_REQUEST)
         user_poll.choices = options
         user_poll.save()
         return Response(status=status.HTTP_200_OK)
