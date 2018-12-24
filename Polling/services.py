@@ -6,7 +6,7 @@ from Polling.models import Poll, PollOption, User, UserPoll
 
 class PollingServices:
     def create_poll(self, title, description, owner, options, participants):
-        print(options, participants)
+        # print(options, participants)
         """
         :param participants: list of usernames
         """
