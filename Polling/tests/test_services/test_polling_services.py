@@ -93,7 +93,13 @@ class PollingServicesTest(TestCase):
                           self.services.save_choices, poll, user_poll, {str(poll_option.id): 3})
 
     def test_save_choices_with_closed_poll(self, *_):
-        pass
+        poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description,
+                                   status=PollStatus.CLOSED.value)
+        poll_option = NormalPollOption.objects.create(value='option1', poll=poll)
+        user_poll = UserPoll.objects.create(user=self.user1, poll=poll,
+                                            choices={str(poll_option.id): OptionStatus.NO.value})
+        self.assertRaises(BusinessLogicException,
+                          self.services.save_choices, poll, user_poll, {str(poll_option.id): OptionStatus.YES.value})
 
     def test_save_choices_with_overlap(self, *_):
         pass
