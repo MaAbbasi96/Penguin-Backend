@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
-from Polling.enums import PollStatus
+from Polling.enums import PollStatus, OptionStatus
 from Polling.models import Poll, User, PollOption, UserPoll
 from Polling.serializers import PollSerializer
+from utilities.exceptions import BusinessLogicException
 from utilities.request import RequestWrapper
 from Polling.services import PollingServices
 
@@ -60,14 +61,20 @@ class PollParticipationView(ViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(PollSerializer(poll).data)
 
+    def _validate_options(self, options, user_poll):
+        if options.keys() != user_poll.choices.keys():
+            raise BusinessLogicException(code='invalid_options', detail='all options must be included')
+        if not set(options.values()) <= set(OptionStatus.values()):
+            raise BusinessLogicException(code='invalid_options', detail='invalid option status')
+
     def vote(self, request, poll_id):
         wrapper = RequestWrapper(request)
         username = wrapper.get_body_param('username')
         user = get_object_or_404(User, username=username)
         options = wrapper.get_body_param('options')
-        # print(options, type(options))
         poll = get_object_or_404(Poll, id=poll_id)
         user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
+        self._validate_options(options, user_poll)
         if poll.status == PollStatus.CLOSED.value:
             return Response('Poll is closed', status=status.HTTP_400_BAD_REQUEST)
         user_poll.choices = options

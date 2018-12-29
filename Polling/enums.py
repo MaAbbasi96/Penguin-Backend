@@ -10,3 +10,7 @@ class OptionStatus(Enum):
     YES = 0
     NO = 1
     MAYBE = 2
+
+    @staticmethod
+    def values():
+        return [0, 1, 2]
