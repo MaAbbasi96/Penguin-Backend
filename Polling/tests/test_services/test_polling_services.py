@@ -4,9 +4,10 @@ from unittest import mock
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase
 
-from Polling.enums import PollStatus
+from Polling.enums import PollStatus, OptionStatus
 from Polling.models import User, Poll, NormalPollOption, UserPoll, WeeklyPollOption
 from Polling.services import PollingServices
+from utilities.exceptions import BusinessLogicException
 
 
 @mock.patch.object(EmailMultiAlternatives, 'send')
@@ -77,12 +78,19 @@ class PollingServicesTest(TestCase):
     def test_save_choices(self, *_):
         poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
         poll_option = NormalPollOption.objects.create(value='option1', poll=poll)
-        user_poll = UserPoll.objects.create(user=self.user1, poll=poll, choices={str(poll_option.id): 1})
-        self.services.save_choices(poll, user_poll, {str(poll_option.id): 0})
-        self.assertDictEqual({str(poll_option.id): 0}, UserPoll.objects.get(id=user_poll.id).choices)
+        user_poll = UserPoll.objects.create(user=self.user1, poll=poll,
+                                            choices={str(poll_option.id): OptionStatus.NO.value})
+        self.services.save_choices(poll, user_poll, {str(poll_option.id): OptionStatus.YES.value})
+        self.assertDictEqual({str(poll_option.id): OptionStatus.YES.value},
+                             UserPoll.objects.get(id=user_poll.id).choices)
 
     def test_save_choices_with_invalid_options(self, *_):
-        pass
+        poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
+        poll_option = NormalPollOption.objects.create(value='option1', poll=poll)
+        user_poll = UserPoll.objects.create(user=self.user1, poll=poll,
+                                            choices={str(poll_option.id): OptionStatus.NO.value})
+        self.assertRaises(BusinessLogicException,
+                          self.services.save_choices, poll, user_poll, {str(poll_option.id): 3})
 
     def test_save_choices_with_closed_poll(self, *_):
         pass
