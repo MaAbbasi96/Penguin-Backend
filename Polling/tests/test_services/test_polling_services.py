@@ -19,7 +19,7 @@ class PollingServicesTest(TestCase):
         self.title = 'title'
         self.description = 'description'
 
-    def test_create_poll(self, mocked_init, mocked_send):
+    def test_create_normal_poll(self, mocked_init, mocked_send):
         self.assertEqual(0, Poll.objects.all().count())
         self.assertEqual(0, NormalPollOption.objects.all().count())
         self.assertEqual(0, UserPoll.objects.all().count())
@@ -35,7 +35,7 @@ class PollingServicesTest(TestCase):
         self.assertEqual(2, NormalPollOption.objects.all().count())
         self.assertEqual(2, UserPoll.objects.all().count())
 
-    def test_finalize_poll(self, mocked_init, mocked_send):
+    def test_finalize_normal_poll(self, mocked_init, mocked_send):
         poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
         option1 = NormalPollOption.objects.create(poll=poll, value='option1')
         NormalPollOption.objects.create(poll=poll, value='option2')
