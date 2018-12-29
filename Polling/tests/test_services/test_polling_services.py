@@ -4,7 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase
 
 from Polling.enums import PollStatus
-from Polling.models import User, Poll, PollOption, UserPoll
+from Polling.models import User, Poll, NormalPollOption, UserPoll
 from Polling.services import PollingServices
 
 
@@ -21,7 +21,7 @@ class PollingServicesTest(TestCase):
 
     def test_create_poll(self, mocked_init, mocked_send):
         self.assertEqual(0, Poll.objects.all().count())
-        self.assertEqual(0, PollOption.objects.all().count())
+        self.assertEqual(0, NormalPollOption.objects.all().count())
         self.assertEqual(0, UserPoll.objects.all().count())
         self.services.create_poll(self.title, self.description, User.objects.get(username='owner'), ['option1', 'option2'],
                                   [User.objects.get(username='user1'), User.objects.get(username='user2'), ])
@@ -31,13 +31,13 @@ class PollingServicesTest(TestCase):
                                        ['user1@example.com', 'user2@example.com'], connection=mock.ANY)
         mocked_send.assert_called()
         self.assertEqual(1, Poll.objects.all().count())
-        self.assertEqual(2, PollOption.objects.all().count())
+        self.assertEqual(2, NormalPollOption.objects.all().count())
         self.assertEqual(2, UserPoll.objects.all().count())
 
     def test_finalize_poll(self, mocked_init, mocked_send):
         poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
-        option1 = PollOption.objects.create(poll=poll, value='option1')
-        PollOption.objects.create(poll=poll, value='option2')
+        option1 = NormalPollOption.objects.create(poll=poll, value='option1')
+        NormalPollOption.objects.create(poll=poll, value='option2')
         UserPoll.objects.create(user=self.user1, poll=poll, choices={})
         UserPoll.objects.create(user=self.user2, poll=poll, choices={})
         self.services.finalize_poll(poll, option1)

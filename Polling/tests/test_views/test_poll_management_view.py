@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from Polling.models import User, Poll, PollOption
+from Polling.models import User, Poll, NormalPollOption
 from Polling.services import PollingServices
 
 
@@ -12,7 +12,7 @@ class PollManagementViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='test_user', email='email@example.com')
         self.poll = Poll.objects.create(title='title', description='description', owner=self.user)
-        self.poll_option = PollOption.objects.create(poll=self.poll, value='option1', final=False)
+        self.poll_option = NormalPollOption.objects.create(poll=self.poll, value='option1', final=False)
 
     @mock.patch.object(PollingServices, 'create_poll')
     def test_create_poll_user_exists(self, mocked_create_poll):
@@ -27,7 +27,8 @@ class PollManagementViewTest(APITestCase):
             'participants': [
                 'user1',
                 'user2'
-            ]
+            ],
+            'is_normal': True
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, 'User does not exist')
         mocked_create_poll.assert_called_once_with('title', 'description', User.objects.get(username='test_user'),
@@ -46,7 +47,8 @@ class PollManagementViewTest(APITestCase):
             'participants': [
                 'user1',
                 'user2'
-            ]
+            ],
+            'is_normal': True
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User does not exist')
         mocked_create_poll.assert_not_called()
