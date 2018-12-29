@@ -1,6 +1,6 @@
 from django.core.mail import send_mail
 
-from Polling.enums import PollStatus
+from Polling.enums import PollStatus, OptionStatus
 from Polling.models import Poll, PollOption, User, UserPoll
 
 
@@ -15,7 +15,7 @@ class PollingServices:
         PollOption.objects.bulk_create([PollOption(poll=poll, value=item_option) for item_option in options])
         for user in users:
             UserPoll.objects.create(user=user, poll=poll, choices={
-                option: False for option in options
+                option: OptionStatus.NO.value for option in options
             })
         subject = 'Invitation to {} polling'.format(title)
         message = 'Please participate in the poll {} using your panel!'.format(title)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from Polling.enums import OptionStatus
 from Polling.models import Poll, PollOption, UserPoll, User
 
 
@@ -12,12 +13,17 @@ class PollSerializer(serializers.ModelSerializer):
         options = {}
         obj.polloption_set.values_list('value', flat=True)
         for option in obj.polloption_set.all():
-            count = 0
+            option_votes = {
+                'maybe': 0,
+                'yes': 0
+            }
             user_votes = UserPoll.objects.filter(poll=obj).values_list('choices', flat=True)
             for vote in user_votes:
-                if vote[option.value]:
-                    count += 1
-            options[option.value] = count
+                if vote[option.value] == OptionStatus.YES.value:
+                    option_votes['yes'] += 1
+                if vote[option.value] == OptionStatus.MAYBE.value:
+                    option_votes['maybe'] += 1
+            options[option.value] = option_votes
         return options
 
     def get_final_option(self, obj):

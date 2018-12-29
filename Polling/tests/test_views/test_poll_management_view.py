@@ -62,7 +62,7 @@ class PollManagementViewTest(APITestCase):
             'description': 'description',
             'final_option': None,
             'options': {
-                'option1': 0
+                'option1': {'maybe': 0, 'yes': 0}
             },
             'status': 0,
             'creator': self.user.username
