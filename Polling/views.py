@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
 from Polling.enums import PollStatus, OptionStatus
-from Polling.models import Poll, User, PollOption, UserPoll
+from Polling.models import Poll, User, NormalPollOption, UserPoll
 from Polling.serializers import PollSerializer
 from utilities.exceptions import BusinessLogicException
 from utilities.request import RequestWrapper
@@ -37,7 +37,7 @@ class PollManagementView(ViewSet):
         option_value = wrapper.get_body_param('option')
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id, owner=user)
-        option = get_object_or_404(PollOption, poll=poll, value=option_value)
+        option = get_object_or_404(NormalPollOption, poll=poll, value=option_value)
         PollingServices().finalize_poll(poll, option)
         return Response(status=status.HTTP_200_OK)
 

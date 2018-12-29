@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 
 from Polling.enums import PollStatus, OptionStatus
-from Polling.models import Poll, PollOption, User, UserPoll
+from Polling.models import Poll, NormalPollOption, User, UserPoll
 
 
 class PollingServices:
@@ -12,7 +12,7 @@ class PollingServices:
         """
         users = User.objects.filter(username__in=participants)
         poll = Poll.objects.create(title=title, description=description, owner=owner)
-        PollOption.objects.bulk_create([PollOption(poll=poll, value=item_option) for item_option in options])
+        NormalPollOption.objects.bulk_create([NormalPollOption(poll=poll, value=item_option) for item_option in options])
         for user in users:
             UserPoll.objects.create(user=user, poll=poll, choices={
                 option: OptionStatus.NO.value for option in options
@@ -29,7 +29,7 @@ class PollingServices:
         poll.status = PollStatus.CLOSED.value
         poll.save()
         users = User.objects.filter(userpoll__poll=poll)
-        PollOption.objects.filter(poll=poll).update(final=False)
+        NormalPollOption.objects.filter(poll=poll).update(final=False)
         option.final = True
         option.save()
         subject = 'Polling {} finished'.format(poll.title)

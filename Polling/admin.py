@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from Polling.models import Poll, User, UserPoll, PollOption
+from Polling.models import Poll, User, UserPoll, NormalPollOption
 
 
 class PollAdmin(admin.ModelAdmin):
@@ -24,4 +24,4 @@ class PollOptionAdmin(admin.ModelAdmin):
 admin.site.register(Poll, PollAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(UserPoll, UserPollAdmin)
-admin.site.register(PollOption, PollOptionAdmin)
+admin.site.register(NormalPollOption, PollOptionAdmin)

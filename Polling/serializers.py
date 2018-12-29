@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from Polling.enums import OptionStatus
-from Polling.models import Poll, PollOption, UserPoll, User
+from Polling.models import Poll, NormalPollOption, UserPoll, User
 
 
 class PollSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class PollSerializer(serializers.ModelSerializer):
     def get_final_option(self, obj):
         try:
             return obj.polloption_set.get(final=True).value
-        except PollOption.DoesNotExist:
+        except NormalPollOption.DoesNotExist:
             return None
 
     def get_creator(self, obj):
