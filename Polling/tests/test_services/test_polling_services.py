@@ -102,4 +102,15 @@ class PollingServicesTest(TestCase):
                           self.services.save_choices, poll, user_poll, {str(poll_option.id): OptionStatus.YES.value})
 
     def test_save_choices_with_overlap(self, *_):
-        pass
+        poll1 = Poll.objects.create(owner=self.owner, title=self.title, description=self.description, is_normal=False)
+        poll2 = Poll.objects.create(owner=self.owner, title=self.title, description=self.description, is_normal=False)
+        poll_option1 = WeeklyPollOption.objects.create(poll=poll1, weekday=0, start_time=datetime.time(16, 30),
+                                                       end_time=datetime.time(18, 30))
+        poll_option2 = WeeklyPollOption.objects.create(poll=poll2, weekday=0, start_time=datetime.time(17, 30),
+                                                       end_time=datetime.time(19, 30))
+        UserPoll.objects.create(user=self.user1, poll=poll1,
+                                choices={str(poll_option1.id): OptionStatus.YES.value})
+        user_poll2 = UserPoll.objects.create(user=self.user1, poll=poll2,
+                                             choices={str(poll_option2.id): OptionStatus.NO.value})
+        self.assertRaises(BusinessLogicException,
+                          self.services.save_choices, poll2, user_poll2, {str(poll_option2.id): OptionStatus.YES.value})
