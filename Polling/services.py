@@ -99,4 +99,3 @@ class PollingServices:
             if dictionary[key] == OptionStatus.YES.value or dictionary[key] == OptionStatus.MAYBE.value:
                 result.append(int(key))
         return result
-

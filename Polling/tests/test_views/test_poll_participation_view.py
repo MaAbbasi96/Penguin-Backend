@@ -39,7 +39,6 @@ class PollManagementParticipationViewTest(APITestCase):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User does not exist')
 
-
     def test_get_poll_user_and_poll_exists(self):
         response = self.client.get(reverse('get-poll', kwargs={'poll_id': self.poll.id}), {
             'username': 'test_user',
