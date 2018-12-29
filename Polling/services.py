@@ -55,4 +55,4 @@ class PollingServices:
 
     @staticmethod
     def _to_time(time_str):
-        return datetime.strptime(time_str, '%I:%M').time()
+        return datetime.strptime(time_str, '%H:%M').time()

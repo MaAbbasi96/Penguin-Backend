@@ -38,7 +38,7 @@ class PollManagementView(ViewSet):
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id, owner=user)
         try:
-            option = NormalPollOption.objects.filter(poll=poll, id=option_id)
+            option = NormalPollOption.objects.get(poll=poll, id=option_id)
         except NormalPollOption.DoesNotExist:
             option = get_object_or_404(WeeklyPollOption, poll=poll, id=option_id)
         PollingServices().finalize_poll(poll, option)
