@@ -22,6 +22,8 @@ class PollingServices:
                 [WeeklyPollOption(poll=poll, weekday=option['weekday'], start_time=self._to_time(option['start_time']),
                                   end_time=self._to_time(option['end_time'])) for option in option_values]
             )
+            poll.is_normal = False
+            poll.save()
         users = User.objects.filter(username__in=participants)
         self._create_user_polls(users, poll, options)
         self._notify(title, users)
@@ -61,6 +63,8 @@ class PollingServices:
     def save_choices(self, poll, user_poll, options):
         self._validate_options(options, user_poll)
         self._validate_poll_not_closed(poll)
+        if user_poll.poll.weeklypolloption_set.exists():
+            self._validate_overlap(user_poll)
         user_poll.choices = options
         user_poll.save()
 
@@ -73,3 +77,26 @@ class PollingServices:
     def _validate_poll_not_closed(self, poll):
         if poll.status == PollStatus.CLOSED.value:
             raise BusinessLogicException(code='poll_closed', detail='Poll is closed and you can no longer vote')
+
+    def _validate_overlap(self, user_poll_to_check):
+        option_ids = []
+        for user_poll in UserPoll.objects.filter(user=user_poll_to_check.user, poll__is_normal=False):
+            if user_poll_to_check == user_poll:
+                continue
+            option_ids.append(self._filter_keys(user_poll.choices))
+        options_to_check = WeeklyPollOption.objects.filter(id__in=self._filter_keys(user_poll_to_check.choices))
+        options = WeeklyPollOption.objects.filter(id__in=option_ids)
+        for option_to_check in options_to_check:
+            for option in options:
+                if option_to_check.weekday == option.weekday and \
+                        (option_to_check.end_time > option.start_time or option_to_check.start_time < option.end_time):
+                    raise BusinessLogicException(code='overlap', detail='You have voted for another poll for this time')
+
+    @staticmethod
+    def _filter_keys(dictionary):
+        result = []
+        for key in dictionary:
+            if dictionary[key] == OptionStatus.YES.value or dictionary[key] == OptionStatus.MAYBE.value:
+                result.append(int(key))
+        return result
+
