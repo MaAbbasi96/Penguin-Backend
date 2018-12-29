@@ -23,8 +23,9 @@ class PollingServicesTest(TestCase):
         self.assertEqual(0, Poll.objects.all().count())
         self.assertEqual(0, NormalPollOption.objects.all().count())
         self.assertEqual(0, UserPoll.objects.all().count())
-        self.services.create_poll(self.title, self.description, User.objects.get(username='owner'), ['option1', 'option2'],
-                                  [User.objects.get(username='user1'), User.objects.get(username='user2'), ])
+        self.services.create_poll(self.title, self.description, User.objects.get(username='owner'),
+                                  ['option1', 'option2'],
+                                  [User.objects.get(username='user1'), User.objects.get(username='user2'), ], True)
         expected_subject = 'Invitation to title polling'
         expected_message = 'Please participate in the poll title using your panel!'
         mocked_init.assert_called_with(expected_subject, expected_message, 'info@penguin.com',
