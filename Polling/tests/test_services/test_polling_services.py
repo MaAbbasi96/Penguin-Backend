@@ -73,3 +73,19 @@ class PollingServicesTest(TestCase):
         mocked_send.assert_called()
         self.assertEqual(True, option1.final, 'Option1 is final')
         self.assertEqual(PollStatus.CLOSED.value, poll.status, 'Poll is closed')
+
+    def test_save_choices(self, *_):
+        poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
+        poll_option = NormalPollOption.objects.create(value='option1', poll=poll)
+        user_poll = UserPoll.objects.create(user=self.user1, poll=poll, choices={str(poll_option.id): 1})
+        self.services.save_choices(poll, user_poll, {str(poll_option.id): 0})
+        self.assertDictEqual({str(poll_option.id): 0}, UserPoll.objects.get(id=user_poll.id).choices)
+
+    def test_save_choices_with_invalid_options(self, *_):
+        pass
+
+    def test_save_choices_with_closed_poll(self, *_):
+        pass
+
+    def test_save_choices_with_overlap(self, *_):
+        pass
