@@ -67,6 +67,10 @@ class PollParticipationView(ViewSet):
         if not set(options.values()) <= set(OptionStatus.values()):
             raise BusinessLogicException(code='invalid_options', detail='invalid option status')
 
+    def _validate_poll_not_closed(self, poll):
+        if poll.status == PollStatus.CLOSED.value:
+            raise BusinessLogicException(code='poll_closed', detail='Poll is closed and you can no longer vote')
+
     def vote(self, request, poll_id):
         wrapper = RequestWrapper(request)
         username = wrapper.get_body_param('username')
@@ -75,8 +79,7 @@ class PollParticipationView(ViewSet):
         poll = get_object_or_404(Poll, id=poll_id)
         user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
         self._validate_options(options, user_poll)
-        if poll.status == PollStatus.CLOSED.value:
-            return Response('Poll is closed', status=status.HTTP_400_BAD_REQUEST)
+        self._validate_poll_not_closed(poll)
         user_poll.choices = options
         user_poll.save()
         return Response(status=status.HTTP_200_OK)
