@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from Polling.enums import OptionStatus
+from Polling.enums import OptionStatus, PollStatus
 from Polling.models import User, Poll, PollOption, UserPoll
 
 
@@ -106,3 +106,14 @@ class PollManagementParticipationViewTest(APITestCase):
             }
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User has no access to this poll')
+
+    def test_vote_for_closed_poll(self):
+        self.poll.status = PollStatus.CLOSED.value
+        self.poll.save()
+        response = self.client.post(reverse('vote', kwargs={'poll_id': self.poll.id}), {
+            'username': 'p_user',
+            'options': {
+                'option1': 1,
+            }
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT, 'Poll is closed and cannot vote for it')
