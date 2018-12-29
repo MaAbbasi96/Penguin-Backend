@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 
 from Polling.enums import PollStatus, OptionStatus
 from Polling.models import Poll, NormalPollOption, User, UserPoll, WeeklyPollOption
+from utilities.exceptions import BusinessLogicException
 
 
 class PollingServices:
@@ -56,3 +57,19 @@ class PollingServices:
     @staticmethod
     def _to_time(time_str):
         return datetime.strptime(time_str, '%H:%M').time()
+
+    def save_choices(self, poll, user_poll, options):
+        self._validate_options(options, user_poll)
+        self._validate_poll_not_closed(poll)
+        user_poll.choices = options
+        user_poll.save()
+
+    def _validate_options(self, options, user_poll):
+        if options.keys() != user_poll.choices.keys():
+            raise BusinessLogicException(code='invalid_options', detail='all options must be included')
+        if not set(options.values()) <= set(OptionStatus.values()):
+            raise BusinessLogicException(code='invalid_options', detail='invalid option status')
+
+    def _validate_poll_not_closed(self, poll):
+        if poll.status == PollStatus.CLOSED.value:
+            raise BusinessLogicException(code='poll_closed', detail='Poll is closed and you can no longer vote')
