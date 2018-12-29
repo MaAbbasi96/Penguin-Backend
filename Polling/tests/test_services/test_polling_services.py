@@ -1,10 +1,11 @@
+import datetime
 from unittest import mock
 
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase
 
 from Polling.enums import PollStatus
-from Polling.models import User, Poll, NormalPollOption, UserPoll
+from Polling.models import User, Poll, NormalPollOption, UserPoll, WeeklyPollOption
 from Polling.services import PollingServices
 
 
@@ -38,7 +39,27 @@ class PollingServicesTest(TestCase):
                              'We have two poll options with values option1 and option2')
         self.assertEqual(2, UserPoll.objects.all().count())
 
-    def test_finalize_normal_poll(self, mocked_init, mocked_send):
+    def test_create_weekly_poll(self, mocked_init, mocked_send):
+        self.assertEqual(0, Poll.objects.all().count())
+        self.assertEqual(0, WeeklyPollOption.objects.all().count())
+        self.assertEqual(0, UserPoll.objects.all().count())
+        options = [
+            {'weekday': 0, 'start_time': '15:30', 'end_time': '16:30'},
+            {'weekday': 1, 'start_time': '16:30', 'end_time': '17:30'},
+        ]
+        self.services.create_poll(self.title, self.description, self.owner, options, [self.user1, self.user2, ], False)
+        mocked_send.assert_called()
+        mocked_init.assert_called()
+        self.assertEqual(1, Poll.objects.all().count())
+        self.assertEqual(self.owner, Poll.objects.first().owner)
+        self.assertEqual(2, WeeklyPollOption.objects.all().count())
+        self.assertListEqual([
+            {'weekday': 0, 'start_time': datetime.time(15, 30), 'end_time': datetime.time(16, 30)},
+            {'weekday': 1, 'start_time': datetime.time(16, 30), 'end_time': datetime.time(17, 30)},
+        ], list(WeeklyPollOption.objects.all().values('weekday', 'start_time', 'end_time')))
+        self.assertEqual(2, UserPoll.objects.all().count())
+
+    def test_finalize_poll(self, mocked_init, mocked_send):
         poll = Poll.objects.create(owner=self.owner, title=self.title, description=self.description)
         option1 = NormalPollOption.objects.create(poll=poll, value='option1')
         NormalPollOption.objects.create(poll=poll, value='option2')
