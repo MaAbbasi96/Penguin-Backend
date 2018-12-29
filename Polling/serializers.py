@@ -20,7 +20,7 @@ class PollSerializer(serializers.ModelSerializer):
             user_votes = UserPoll.objects.filter(poll=obj).values_list('choices', flat=True)
             for vote in user_votes:
                 if vote[option.value] == OptionStatus.YES.value:
-                    option_votes['no'] += 1
+                    option_votes['yes'] += 1
                 if vote[option.value] == OptionStatus.MAYBE.value:
                     option_votes['maybe'] += 1
             options[option.value] = option_votes
