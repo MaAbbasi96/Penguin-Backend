@@ -4,7 +4,7 @@ from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOpt
 
 
 class PollAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner', 'title', 'description', 'status')
+    list_display = ('id', 'owner', 'title', 'description', 'status', 'is_normal')
     list_editable = ('title', 'status')
 
 

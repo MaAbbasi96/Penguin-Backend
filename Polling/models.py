@@ -20,6 +20,7 @@ class Poll(models.Model):
     description = models.TextField(max_length=2048, null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=((st.value, st) for st in PollStatus),
                                               default=PollStatus.IN_PROGRESS.value)
+    is_normal = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
