@@ -117,3 +117,14 @@ class PollManagementParticipationViewTest(APITestCase):
             }
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT, 'Poll is closed and cannot vote for it')
+
+    def test_vote_with_invalid_options(self):
+        self.poll.status = PollStatus.CLOSED.value
+        self.poll.save()
+        response = self.client.post(reverse('vote', kwargs={'poll_id': self.poll.id}), {
+            'username': 'p_user',
+            'options': {
+                'option1': True,
+            }
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT, 'Option type is not in OptionStatus enum')
