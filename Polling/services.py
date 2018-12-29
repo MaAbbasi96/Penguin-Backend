@@ -63,9 +63,9 @@ class PollingServices:
     def save_choices(self, poll, user_poll, options):
         self._validate_options(options, user_poll)
         self._validate_poll_not_closed(poll)
+        user_poll.choices = options
         if user_poll.poll.weeklypolloption_set.exists():
             self._validate_overlap(user_poll)
-        user_poll.choices = options
         user_poll.save()
 
     def _validate_options(self, options, user_poll):
@@ -83,7 +83,7 @@ class PollingServices:
         for user_poll in UserPoll.objects.filter(user=user_poll_to_check.user, poll__is_normal=False):
             if user_poll_to_check == user_poll:
                 continue
-            option_ids.append(self._filter_keys(user_poll.choices))
+            option_ids += (self._filter_keys(user_poll.choices))
         options_to_check = WeeklyPollOption.objects.filter(id__in=self._filter_keys(user_poll_to_check.choices))
         options = WeeklyPollOption.objects.filter(id__in=option_ids)
         for option_to_check in options_to_check:
