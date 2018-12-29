@@ -36,21 +36,27 @@ class AbstractPollOption(models.Model):
 class NormalPollOption(AbstractPollOption):
     value = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.value
+
 
 class WeeklyPollOption(AbstractPollOption):
     DAYS_OF_WEEK = [
-        (5, jdate.j_weekdays_fa[0]),
-        (6, jdate.j_weekdays_fa[1]),
-        (0, jdate.j_weekdays_fa[2]),
-        (1, jdate.j_weekdays_fa[3]),
-        (2, jdate.j_weekdays_fa[4]),
-        (3, jdate.j_weekdays_fa[5]),
-        (4, jdate.j_weekdays_fa[6]),
+        (0, jdate.j_weekdays_fa[0]),
+        (1, jdate.j_weekdays_fa[1]),
+        (2, jdate.j_weekdays_fa[2]),
+        (3, jdate.j_weekdays_fa[3]),
+        (4, jdate.j_weekdays_fa[4]),
+        (5, jdate.j_weekdays_fa[5]),
+        (6, jdate.j_weekdays_fa[6]),
     ]
 
     weekday = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK)
     start_time = models.TimeField()
     end_time = models.TimeField()
+
+    def __str__(self):
+        return '{}, {} to {}'.format(self.DAYS_OF_WEEK[self.weekday][1], self.start_time, self.end_time)
 
 
 class UserPoll(models.Model):
