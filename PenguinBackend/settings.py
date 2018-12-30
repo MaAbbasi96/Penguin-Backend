@@ -25,7 +25,7 @@ SECRET_KEY = '$l-i4%ic=)tk6rc3(_e+!vy7guw+89&pr&7w)p#c2-)gib_hmg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -52,6 +52,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'utilities.exception_middleware.ApplicationExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'PenguinBackend.urls'
