@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from Polling.enums import OptionStatus, PollStatus
-from Polling.models import User, Poll, PollOption, UserPoll
+from Polling.models import User, Poll, NormalPollOption, UserPoll
 
 
 class PollManagementParticipationViewTest(APITestCase):
@@ -11,9 +11,9 @@ class PollManagementParticipationViewTest(APITestCase):
         self.user = User.objects.create(username='test_user', email='email@example.com')
         self.participated_user = User.objects.create(username='p_user', email='email2@example.com')
         self.poll = Poll.objects.create(title='title', description='description', owner=self.user)
+        self.poll_option = NormalPollOption.objects.create(poll=self.poll, value='option1', final=False)
         self.user_poll = UserPoll.objects.create(poll=self.poll, user=self.participated_user,
-                                                 choices={'option1': OptionStatus.NO.value})
-        self.poll_option = PollOption.objects.create(poll=self.poll, value='option1', final=False)
+                                                 choices={str(self.poll_option.id): OptionStatus.NO.value})
 
     def test_get_participated_polls_user_exists(self):
         response = self.client.get(reverse('get-participated-polls'), {
@@ -26,7 +26,7 @@ class PollManagementParticipationViewTest(APITestCase):
             'description': 'description',
             'final_option': None,
             'options': {
-                'option1': {'maybe': 0, 'yes': 0}
+                str(self.poll_option.id): {'maybe': 0, 'yes': 0, 'value': 'option1'}
             },
             'status': 0,
             'creator': self.user.username
@@ -39,7 +39,6 @@ class PollManagementParticipationViewTest(APITestCase):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User does not exist')
 
-
     def test_get_poll_user_and_poll_exists(self):
         response = self.client.get(reverse('get-poll', kwargs={'poll_id': self.poll.id}), {
             'username': 'test_user',
@@ -51,7 +50,7 @@ class PollManagementParticipationViewTest(APITestCase):
             'description': 'description',
             'final_option': None,
             'options': {
-                'option1': {'maybe': 0, 'yes': 0}
+                str(self.poll_option.id): {'maybe': 0, 'yes': 0, 'value': 'option1'}
             },
             'status': 0,
             'creator': self.user.username
@@ -74,11 +73,11 @@ class PollManagementParticipationViewTest(APITestCase):
         response = self.client.post(reverse('vote', kwargs={'poll_id': self.poll.id}), {
             'username': 'p_user',
             'options': {
-                'option1': 1,
+                str(self.poll_option.id): 1,
             }
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, 'User has no access to this poll')
-        self.assertEqual(UserPoll.objects.get(id=self.user_poll.id).choices['option1'], 1)
+        self.assertEqual(UserPoll.objects.get(id=self.user_poll.id).choices[str(self.poll_option.id)], 1)
 
     def test_vote_user_doesnt_exist(self):
         response = self.client.post(reverse('vote', kwargs={'poll_id': self.poll.id}), {

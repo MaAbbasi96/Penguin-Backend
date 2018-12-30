@@ -1,6 +1,14 @@
+coverage==4.5.2
 Django==1.11
 django-filter==2.0.0
 djangorestframework==3.9.0
+flake8==3.6.0
+jdate==0.0.3
+jdatetime==3.1.0
+Khayyam==3.0.17
 Markdown==3.0.1
+mccabe==0.6.1
 psycopg2-binary==2.7.6.1
+pycodestyle==2.4.0
+pyflakes==2.0.0
 pytz==2018.7
