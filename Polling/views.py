@@ -76,15 +76,11 @@ class PollParticipationView(ViewSet):
         username = wrapper.get_body_param('username')
         message = wrapper.get_body_param('message')
         parent_id = wrapper.get_body_param('parent_id')
-        print(parent_id)
         parent = None
-        if parent_id != 0:  # assume that it is 0 when it does not point to a comment
+        if parent_id != 0:
             parent = get_object_or_404(Comment, id=parent_id)
         user = get_object_or_404(User, username=username)
-        print(user)
         poll = get_object_or_404(Poll, id=poll_id)
-        print(poll)
-        print(poll_id, option_id)
         user_poll = get_object_or_404(UserPoll, user=user, poll=poll, id=option_id)
         PollingServices().comment(user, user_poll, parent, message)
         return Response(status=status.HTTP_200_OK)
