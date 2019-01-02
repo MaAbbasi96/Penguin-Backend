@@ -14,7 +14,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class UserPollAdmin(admin.ModelAdmin):
-    list_display = ('user', 'poll', 'choices')
+    list_display = ('user', 'poll', 'choice')
 
 
 class NormalPollOptionAdmin(admin.ModelAdmin):

@@ -1,3 +1,5 @@
+import datetime
+
 from jdatetime import date as jdate
 
 from django.contrib.postgres.fields import JSONField
@@ -63,4 +65,12 @@ class WeeklyPollOption(AbstractPollOption):
 class UserPoll(models.Model):
     user = models.ForeignKey(User)
     poll = models.ForeignKey(Poll)
-    choices = JSONField()
+    choice = JSONField()
+
+
+class Comment(models.Model):
+    message = models.CharField(max_length=1024)
+    date = models.DateField(default=datetime.date.today)
+    option = models.ForeignKey(UserPoll, blank=True, null=True)
+    parent = models.ForeignKey('self')
+
