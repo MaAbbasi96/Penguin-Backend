@@ -81,6 +81,10 @@ class PollParticipationView(ViewSet):
             parent = get_object_or_404(Comment, id=parent_id)
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id)
-        user_poll = get_object_or_404(UserPoll, user=user, poll=poll, id=option_id)
-        PollingServices().comment(user, user_poll, parent, message)
+        user_polls = get_list_or_404(UserPoll, user=user, poll=poll)
+        if poll.is_normal:
+            option = get_object_or_404(NormalPollOption, id=option_id)
+        else:
+            option = get_object_or_404(WeeklyPollOption, id=option_id)
+        PollingServices().comment(user, user_polls, option, parent, message)
         return Response(status=status.HTTP_200_OK)

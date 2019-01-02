@@ -75,8 +75,17 @@ class PollingServices:
                     }
             user_poll.save()
 
-    def comment(self, user, user_poll, parent, message):
-        Comment.objects.create(user=user, option=user_poll, parent=parent, message=message)
+    def comment(self, user, user_polls, option, parent, message):
+        if parent is not None:
+            self._validate_comment_parents(option, parent)
+        for user_poll in user_polls:
+            if str(option.id) in user_poll.choice.keys():
+                Comment.objects.create(user=user, option=user_poll, parent=parent, message=message)
+
+    def _validate_comment_parents(self, option, parent_comment):
+        if option.id != parent_comment.option.id:
+            raise BusinessLogicException(code='invalid_parent', detail='current comment does not match '
+                                                                       'with the option and its parent comment')
 
     def _validate_options(self, options, user_polls):
         if list(options.keys()) != [list(user_poll.choice.keys())[0] for user_poll in user_polls]:
@@ -103,11 +112,11 @@ class PollingServices:
             for option in options:
                 if option_to_check.weekday == option.weekday and \
                         (
-                            (option_to_check.end_time > option.start_time and
-                             option_to_check.start_time < option.end_time)
-                            or
-                            (option.end_time > option_to_check.start_time and
-                             option.start_time < option_to_check.end_time)
+                                (option_to_check.end_time > option.start_time and
+                                 option_to_check.start_time < option.end_time)
+                                or
+                                (option.end_time > option_to_check.start_time and
+                                 option.start_time < option_to_check.end_time)
                         ):
                     raise BusinessLogicException(code='overlap', detail='You have voted for another poll for this time')
 
