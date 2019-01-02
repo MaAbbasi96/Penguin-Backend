@@ -82,6 +82,14 @@ class PollingServices:
             if str(option.id) in user_poll.choice.keys():
                 Comment.objects.create(user=user, option=user_poll, parent=parent, message=message)
 
+    def get_comments(self, poll, option):
+        user_polls = UserPoll.objects.filter(poll=poll)
+        current_user_polls = []
+        for user_poll in user_polls:
+            if str(option.id) in user_poll.choice.keys():
+                current_user_polls.append(user_poll)
+        return Comment.objects.filter(option__in=current_user_polls)
+
     def _validate_comment_parents(self, option, parent_comment):
         if option.id != parent_comment.option.id:
             raise BusinessLogicException(code='invalid_parent', detail='current comment does not match '
@@ -112,11 +120,10 @@ class PollingServices:
             for option in options:
                 if option_to_check.weekday == option.weekday and \
                         (
-                                (option_to_check.end_time > option.start_time and
-                                 option_to_check.start_time < option.end_time)
-                                or
-                                (option.end_time > option_to_check.start_time and
-                                 option.start_time < option_to_check.end_time)
+                            (option_to_check.end_time > option.start_time and
+                             option_to_check.start_time < option.end_time) or
+                            (option.end_time > option_to_check.start_time and
+                             option.start_time < option_to_check.end_time)
                         ):
                     raise BusinessLogicException(code='overlap', detail='You have voted for another poll for this time')
 

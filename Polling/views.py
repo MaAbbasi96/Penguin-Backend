@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
 from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption, Comment
-from Polling.serializers import PollSerializer
+from Polling.serializers import PollSerializer, CommentSerializer
 from utilities.request import RequestWrapper
 from Polling.services import PollingServices
 
@@ -88,3 +88,18 @@ class PollParticipationView(ViewSet):
             option = get_object_or_404(WeeklyPollOption, id=option_id)
         PollingServices().comment(user, user_polls, option, parent, message)
         return Response(status=status.HTTP_200_OK)
+
+    def get_comments(self, request, poll_id, option_id):
+        wrapper = RequestWrapper(request)
+        username = wrapper.get_query_param('username')
+        user = get_object_or_404(User, username=username)
+        poll = get_object_or_404(Poll, id=poll_id)
+        user_poll = UserPoll.objects.filter(user=user, poll=poll).distinct()
+        if not user_poll and user != poll.owner:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if poll.is_normal:
+            option = get_object_or_404(NormalPollOption, id=option_id)
+        else:
+            option = get_object_or_404(WeeklyPollOption, id=option_id)
+        comments = PollingServices().get_comments(poll, option)
+        return Response(CommentSerializer(comments, many=True).data)

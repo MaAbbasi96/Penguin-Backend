@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from Polling.enums import OptionStatus
-from Polling.models import Poll, NormalPollOption, UserPoll, User, WeeklyPollOption
+from Polling.models import Poll, NormalPollOption, UserPoll, User, WeeklyPollOption, Comment
 
 
 class PollSerializer(serializers.ModelSerializer):
@@ -53,3 +53,9 @@ class PollSerializer(serializers.ModelSerializer):
     class Meta:
         model = Poll
         fields = ('id', 'title', 'description', 'status', 'options', 'final_option', 'creator', 'is_normal')
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'message', 'date', 'user', 'option', 'parent')
