@@ -3,7 +3,7 @@ from datetime import datetime
 from django.core.mail import send_mail
 
 from Polling.enums import PollStatus, OptionStatus
-from Polling.models import Poll, NormalPollOption, User, UserPoll, WeeklyPollOption
+from Polling.models import Poll, NormalPollOption, User, UserPoll, WeeklyPollOption, Comment
 from utilities.exceptions import BusinessLogicException
 
 
@@ -75,6 +75,9 @@ class PollingServices:
                     }
             user_poll.save()
 
+    def comment(self, user, user_poll, parent, message):
+        Comment.objects.create(user=user, option=user_poll, parent=parent, message=message)
+
     def _validate_options(self, options, user_polls):
         if list(options.keys()) != [list(user_poll.choice.keys())[0] for user_poll in user_polls]:
             raise BusinessLogicException(code='invalid_options', detail='all options must be included')
@@ -100,11 +103,11 @@ class PollingServices:
             for option in options:
                 if option_to_check.weekday == option.weekday and \
                         (
-                            (option_to_check.end_time > option.start_time
-                                and option_to_check.start_time < option.end_time)
+                            (option_to_check.end_time > option.start_time and
+                             option_to_check.start_time < option.end_time)
                             or
-                            (option.end_time > option_to_check.start_time
-                                and option.start_time < option_to_check.end_time)
+                            (option.end_time > option_to_check.start_time and
+                             option.start_time < option_to_check.end_time)
                         ):
                     raise BusinessLogicException(code='overlap', detail='You have voted for another poll for this time')
 

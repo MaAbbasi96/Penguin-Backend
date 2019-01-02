@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
-from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption
+from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption, Comment
 from Polling.serializers import PollSerializer
 from utilities.request import RequestWrapper
 from Polling.services import PollingServices
@@ -69,4 +69,22 @@ class PollParticipationView(ViewSet):
         poll = get_object_or_404(Poll, id=poll_id)
         user_poll = get_list_or_404(UserPoll, user=user, poll=poll)
         PollingServices().save_choices(poll, user_poll, options)
+        return Response(status=status.HTTP_200_OK)
+
+    def comment(self, request, poll_id, option_id):
+        wrapper = RequestWrapper(request)
+        username = wrapper.get_body_param('username')
+        message = wrapper.get_body_param('message')
+        parent_id = wrapper.get_body_param('parent_id')
+        print(parent_id)
+        parent = None
+        if parent_id != 0:  # assume that it is 0 when it does not point to a comment
+            parent = get_object_or_404(Comment, id=parent_id)
+        user = get_object_or_404(User, username=username)
+        print(user)
+        poll = get_object_or_404(Poll, id=poll_id)
+        print(poll)
+        print(poll_id, option_id)
+        user_poll = get_object_or_404(UserPoll, user=user, poll=poll, id=option_id)
+        PollingServices().comment(user, user_poll, parent, message)
         return Response(status=status.HTTP_200_OK)

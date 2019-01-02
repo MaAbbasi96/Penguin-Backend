@@ -69,8 +69,8 @@ class UserPoll(models.Model):
 
 
 class Comment(models.Model):
+    user = models.ForeignKey(User)
+    option = models.ForeignKey(UserPoll, blank=True, null=True)
+    parent = models.ForeignKey('self', blank=True, null=True)
     message = models.CharField(max_length=1024)
     date = models.DateField(default=datetime.date.today)
-    option = models.ForeignKey(UserPoll, blank=True, null=True)
-    parent = models.ForeignKey('self')
-
