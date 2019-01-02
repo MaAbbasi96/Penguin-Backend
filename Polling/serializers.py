@@ -16,12 +16,15 @@ class PollSerializer(serializers.ModelSerializer):
             'maybe': 0,
             'yes': 0
         }
-        user_votes = UserPoll.objects.filter(poll=obj).values_list('choices', flat=True)
+        user_votes = UserPoll.objects.filter(poll=obj).values_list('choice', flat=True)
+        # print(user_votes)
         for vote in user_votes:
-            if vote[str(option.id)] == OptionStatus.YES.value:
-                option_votes['yes'] += 1
-            if vote[str(option.id)] == OptionStatus.MAYBE.value:
-                option_votes['maybe'] += 1
+            # print(vote, option, str(option.id) in vote)
+            if str(option.id) in vote:
+                if vote[str(option.id)] == OptionStatus.YES.value:
+                    option_votes['yes'] += 1
+                if vote[str(option.id)] == OptionStatus.MAYBE.value:
+                    option_votes['maybe'] += 1
         return option_votes
 
     def get_options(self, obj):
@@ -49,4 +52,4 @@ class PollSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Poll
-        fields = ('id', 'title', 'description', 'status', 'options', 'final_option', 'creator')
+        fields = ('id', 'title', 'description', 'status', 'options', 'final_option', 'creator', 'is_normal')

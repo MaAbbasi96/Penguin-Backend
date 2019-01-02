@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
@@ -48,7 +48,7 @@ class PollParticipationView(ViewSet):
         wrapper = RequestWrapper(request)
         username = wrapper.get_query_param('username')
         user = get_object_or_404(User, username=username)
-        polls = Poll.objects.filter(userpoll__user=user)
+        polls = Poll.objects.filter(userpoll__user=user).distinct()
         return Response(PollSerializer(polls, many=True).data)
 
     def get_poll(self, request, poll_id):
@@ -56,7 +56,7 @@ class PollParticipationView(ViewSet):
         username = wrapper.get_query_param('username')
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id)
-        user_poll = UserPoll.objects.filter(user=user, poll=poll)
+        user_poll = UserPoll.objects.filter(user=user, poll=poll).distinct()
         if not user_poll and user != poll.owner:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(PollSerializer(poll).data)
@@ -67,6 +67,6 @@ class PollParticipationView(ViewSet):
         user = get_object_or_404(User, username=username)
         options = wrapper.get_body_param('options')
         poll = get_object_or_404(Poll, id=poll_id)
-        user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
+        user_poll = get_list_or_404(UserPoll, user=user, poll=poll)
         PollingServices().save_choices(poll, user_poll, options)
         return Response(status=status.HTTP_200_OK)
