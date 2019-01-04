@@ -11,4 +11,8 @@ urlpatterns = [
         name='finalize-poll'),
     url(r'^participated/?', PollParticipationView.as_view({'get': 'get_participated_polls'}),
         name='get-participated-polls'),
+    url(r'^comment/(?P<poll_id>\d+)/(?P<option_id>\d+)/?', PollParticipationView.as_view({'post': 'comment'}),
+        name='comment'),
+    url(r'^comments/(?P<poll_id>\d+)/(?P<option_id>\d+)/?', PollParticipationView.as_view({'get': 'get_comments'}),
+        name='get_comments'),
 ]

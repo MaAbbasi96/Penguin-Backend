@@ -1,10 +1,10 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
-from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption
-from Polling.serializers import PollSerializer
+from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption, Comment
+from Polling.serializers import PollSerializer, CommentSerializer
 from utilities.request import RequestWrapper
 from Polling.services import PollingServices
 
@@ -48,7 +48,7 @@ class PollParticipationView(ViewSet):
         wrapper = RequestWrapper(request)
         username = wrapper.get_query_param('username')
         user = get_object_or_404(User, username=username)
-        polls = Poll.objects.filter(userpoll__user=user)
+        polls = Poll.objects.filter(userpoll__user=user).distinct()
         return Response(PollSerializer(polls, many=True).data)
 
     def get_poll(self, request, poll_id):
@@ -56,7 +56,7 @@ class PollParticipationView(ViewSet):
         username = wrapper.get_query_param('username')
         user = get_object_or_404(User, username=username)
         poll = get_object_or_404(Poll, id=poll_id)
-        user_poll = UserPoll.objects.filter(user=user, poll=poll)
+        user_poll = UserPoll.objects.filter(user=user, poll=poll).distinct()
         if not user_poll and user != poll.owner:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(PollSerializer(poll).data)
@@ -67,6 +67,39 @@ class PollParticipationView(ViewSet):
         user = get_object_or_404(User, username=username)
         options = wrapper.get_body_param('options')
         poll = get_object_or_404(Poll, id=poll_id)
-        user_poll = get_object_or_404(UserPoll, user=user, poll=poll)
+        user_poll = get_list_or_404(UserPoll, user=user, poll=poll)
         PollingServices().save_choices(poll, user_poll, options)
         return Response(status=status.HTTP_200_OK)
+
+    def comment(self, request, poll_id, option_id):
+        wrapper = RequestWrapper(request)
+        username = wrapper.get_body_param('username')
+        message = wrapper.get_body_param('message')
+        parent_id = wrapper.get_body_param('parent_id')
+        parent = None
+        if parent_id != 0:
+            parent = get_object_or_404(Comment, id=parent_id)
+        user = get_object_or_404(User, username=username)
+        poll = get_object_or_404(Poll, id=poll_id)
+        user_polls = get_list_or_404(UserPoll, user=user, poll=poll)
+        if poll.is_normal:
+            option = get_object_or_404(NormalPollOption, id=option_id)
+        else:
+            option = get_object_or_404(WeeklyPollOption, id=option_id)
+        PollingServices().comment(user, user_polls, option, parent, message)
+        return Response(status=status.HTTP_200_OK)
+
+    def get_comments(self, request, poll_id, option_id):
+        wrapper = RequestWrapper(request)
+        username = wrapper.get_query_param('username')
+        user = get_object_or_404(User, username=username)
+        poll = get_object_or_404(Poll, id=poll_id)
+        user_poll = UserPoll.objects.filter(user=user, poll=poll).distinct()
+        if not user_poll and user != poll.owner:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if poll.is_normal:
+            option = get_object_or_404(NormalPollOption, id=option_id)
+        else:
+            option = get_object_or_404(WeeklyPollOption, id=option_id)
+        comments = PollingServices().get_comments(poll, option)
+        return Response(CommentSerializer(comments, many=True).data)

@@ -67,7 +67,8 @@ class PollManagementViewTest(APITestCase):
                 str(self.poll_option.id): {'maybe': 0, 'yes': 0, 'value': 'option1'}
             },
             'status': 0,
-            'creator': self.user.username
+            'creator': self.user.username,
+            'is_normal': True
         }
         self.assertDictEqual(dict(response.data[0]), obj)
 
