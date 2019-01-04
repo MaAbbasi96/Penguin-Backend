@@ -56,6 +56,11 @@ class PollSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    option_id = serializers.SerializerMethodField()
+
+    def get_option_id(self, obj):
+        return list(UserPoll.objects.get(id=obj.option_id).choice.keys())[0]
+
     class Meta:
         model = Comment
-        fields = ('id', 'message', 'date', 'user', 'option', 'parent')
+        fields = ('id', 'message', 'date', 'user', 'option_id', 'parent')
