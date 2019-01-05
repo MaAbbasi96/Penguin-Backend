@@ -15,4 +15,5 @@ urlpatterns = [
         name='comment'),
     url(r'^comments/(?P<poll_id>\d+)/(?P<option_id>\d+)/?', PollParticipationView.as_view({'get': 'get_comments'}),
         name='get_comments'),
+    url(r'^edit/(?P<poll_id>\d+)?', PollManagementView.as_view({'put': 'edit_poll'}), name='edit-poll'),
 ]

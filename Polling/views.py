@@ -18,9 +18,15 @@ class PollManagementView(ViewSet):
         options = wrapper.get_body_param('options')
         participants = wrapper.get_body_param('participants')
         is_normal = wrapper.get_body_param('is_normal')
+        message = wrapper.get_body_param('message')
         user = get_object_or_404(User, username=username)
-        PollingServices().create_poll(title, description, user, options, participants, is_normal)
+        PollingServices().create_poll(title, description, user, options, participants, is_normal, message)
         return Response(status=status.HTTP_200_OK)
+
+    def edit_poll(self, request, poll_id):
+        poll = get_object_or_404(Poll, id=poll_id)
+        poll.delete()
+        return self.create_poll(request)
 
     def get_created_polls(self, request):
         wrapper = RequestWrapper(request)

@@ -8,7 +8,7 @@ from utilities.exceptions import BusinessLogicException
 
 
 class PollingServices:
-    def create_poll(self, title, description, owner, option_values, participants, is_normal):
+    def create_poll(self, title, description, owner, option_values, participants, is_normal, message):
         """
         :param participants: list of username
         """
@@ -26,7 +26,7 @@ class PollingServices:
             poll.save()
         users = User.objects.filter(username__in=participants)
         self._create_user_polls(users, poll, options)
-        self._notify(title, users)
+        self._notify(title, users, message)
 
     @staticmethod
     def notify_with_email(users, subject, message):
@@ -52,9 +52,9 @@ class PollingServices:
                     str(option.id): OptionStatus.NO.value
                 })
 
-    def _notify(self, title, users):
+    def _notify(self, title, users, message):
         subject = 'Invitation to {} polling'.format(title)
-        message = 'Please participate in the poll {} using your panel!'.format(title)
+        message = 'Please participate in the poll {} using your panel!'.format(title) if message is None else message
         self.notify_with_email(users, subject, message)
 
     @staticmethod
