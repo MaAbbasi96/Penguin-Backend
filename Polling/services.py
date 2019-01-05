@@ -28,6 +28,22 @@ class PollingServices:
         self._create_user_polls(users, poll, options)
         self._notify(title, users, message)
 
+    def edit_poll(self, poll, message):
+        self._validate_finalized_poll(poll)
+        poll.status = PollStatus.IN_PROGRESS.value
+        poll.save()
+        if poll.is_normal:
+            option = NormalPollOption.objects.get(poll=poll, final=True)
+        else:
+            option = WeeklyPollOption.objects.get(poll=poll, final=True)
+        option.final = False
+        option.save()
+        users = User.objects.filter(userpoll__poll=poll).distinct()
+        self._notify(poll.title, users, message)
+
+
+
+
     @staticmethod
     def notify_with_email(users, subject, message):
         send_mail(subject, message, 'info@penguin.com', [user.email for user in users], fail_silently=True)
@@ -91,7 +107,8 @@ class PollingServices:
         return Comment.objects.filter(option__in=current_user_polls)
 
     def _validate_comment_parents(self, option, parent_comment):
-        if option.id != parent_comment.option.id:
+        print(option.id, list(parent_comment.option.choice.keys())[0])
+        if str(option.id) != list(parent_comment.option.choice.keys())[0]:
             raise BusinessLogicException(code='invalid_parent', detail='current comment does not match '
                                                                        'with the option and its parent comment')
 
@@ -126,6 +143,10 @@ class PollingServices:
                              option.start_time < option_to_check.end_time)
                         ):
                     raise BusinessLogicException(code='overlap', detail='You have voted for another poll for this time')
+
+    def _validate_finalized_poll(self, poll):
+        if poll.status != PollStatus.CLOSED.value:
+            raise BusinessLogicException(code='invalid_poll', detail='poll is not closed yet')
 
     @staticmethod
     def _filter_keys(dictionary):

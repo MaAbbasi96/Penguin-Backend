@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
+from Polling.enums import PollStatus
 from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption, Comment
 from Polling.serializers import PollSerializer, CommentSerializer
 from utilities.request import RequestWrapper
@@ -24,9 +25,11 @@ class PollManagementView(ViewSet):
         return Response(status=status.HTTP_200_OK)
 
     def edit_poll(self, request, poll_id):
+        wrapper = RequestWrapper(request)
         poll = get_object_or_404(Poll, id=poll_id)
-        poll.delete()
-        return self.create_poll(request)
+        message = wrapper.get_body_param('message')
+        PollingServices().edit_poll(poll, message)
+        return Response(status=status.HTTP_200_OK)
 
     def get_created_polls(self, request):
         wrapper = RequestWrapper(request)
