@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from Polling.enums import PollStatus
 from Polling.models import User, Poll, NormalPollOption
 from Polling.services import PollingServices
 
@@ -57,46 +58,23 @@ class PollManagementViewTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User does not exist')
         mocked_create_poll.assert_not_called()
 
-    @mock.patch.object(PollingServices, 'create_poll')
-    def test_edit_poll_user_exists(self, mocked_edit_poll):
+    @mock.patch.object(PollingServices, 'edit_poll')
+    def test_edit_poll_happy_path(self, mocked_edit_poll):
+        self.poll_option.final = True
+        self.poll.status = PollStatus.CLOSED.value
         response = self.client.put(reverse('edit-poll', kwargs={'poll_id': self.poll.id}), {
             'username': 'test_user',
-            'title': 'title',
-            'description': 'description',
-            'options': [
-                'option1',
-                'option2'
-            ],
-            'participants': [
-                'user1',
-                'user2'
-            ],
-            'is_normal': True,
-            'message': 'salam'
+            'message': 'message'
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, 'User does not exist')
-        mocked_edit_poll.assert_called_once_with('title', 'description', User.objects.get(username='test_user'),
-                                                   ['option1', 'option2'], ['user1', 'user2'], True, 'salam')
+        mocked_edit_poll.assert_called_once_with(self.poll, 'message')
 
-    @mock.patch.object(PollingServices, 'create_poll')
-    def test_edit_poll_user_doesnt_exist(self, mocked_edit_poll):
-        response = self.client.put(reverse('edit-poll'), {
-            'username': 'fake_username',
-            'title': 'title',
-            'description': 'description',
-            'options': [
-                'option1',
-                'option2'
-            ],
-            'participants': [
-                'user1',
-                'user2'
-            ],
-            'is_normal': True,
-            'message': 'salam'
+    def test_edit_poll_poll_is_not_final(self):
+        response = self.client.put(reverse('edit-poll', kwargs={'poll_id': self.poll.id}), {
+            'username': 'test_user',
+            'message': 'message'
         }, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User does not exist')
-        mocked_edit_poll.assert_not_called()
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT, 'Poll is not final')
 
     def test_get_created_polls_user_exists(self):
         response = self.client.get(reverse('get-created-polls'), {
