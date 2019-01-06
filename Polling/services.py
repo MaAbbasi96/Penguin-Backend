@@ -41,9 +41,6 @@ class PollingServices:
         users = User.objects.filter(userpoll__poll=poll).distinct()
         self._notify(poll.title, users, message)
 
-
-
-
     @staticmethod
     def notify_with_email(users, subject, message):
         send_mail(subject, message, 'info@penguin.com', [user.email for user in users], fail_silently=True)

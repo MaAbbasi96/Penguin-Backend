@@ -171,7 +171,7 @@ class PollParticipationViewTest(APITestCase):
 
     def test_get_comments_happy_path(self):
         response = self.client.get(reverse('get_comments',
-                                            kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id}), {
+                                           kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id}), {
             'username': 'test_user',
         }, format='json')
         obj = {
@@ -187,14 +187,14 @@ class PollParticipationViewTest(APITestCase):
 
     def test_get_comments_user_doesnt_exist(self):
         response = self.client.get(reverse('get_comments',
-                                            kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id}), {
+                                           kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id}), {
             'username': 'fake_user',
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User doesnt exist')
 
     def test_get_comments_option_doesnt_exist(self):
         response = self.client.get(reverse('get_comments',
-                                            kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id + 10}), {
+                                           kwargs={'poll_id': self.poll.id, 'option_id': self.poll_option.id + 10}), {
             'username': 'p_user',
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'Option doesnt exist')

@@ -114,4 +114,5 @@ class PollingServicesTest(TestCase):
         user_poll2 = UserPoll.objects.create(user=self.user1, poll=poll2,
                                              choice={str(poll_option2.id): OptionStatus.NO.value})
         self.assertRaises(BusinessLogicException,
-                          self.services.save_choices, poll2, [user_poll2], {str(poll_option2.id): OptionStatus.YES.value})
+                          self.services.save_choices, poll2, [user_poll2],
+                          {str(poll_option2.id): OptionStatus.YES.value})

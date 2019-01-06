@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 
-from Polling.enums import PollStatus
 from Polling.models import Poll, User, UserPoll, NormalPollOption, WeeklyPollOption, Comment
 from Polling.serializers import PollSerializer, CommentSerializer
 from utilities.request import RequestWrapper
