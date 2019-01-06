@@ -6,7 +6,7 @@ from Polling.enums import OptionStatus, PollStatus
 from Polling.models import User, Poll, NormalPollOption, UserPoll, Comment
 
 
-class PollManagementParticipationViewTest(APITestCase):
+class PollParticipationViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='test_user', email='email@example.com')
         self.participated_user = User.objects.create(username='p_user', email='email2@example.com')
