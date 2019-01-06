@@ -104,7 +104,6 @@ class PollingServices:
         return Comment.objects.filter(option__in=current_user_polls)
 
     def _validate_comment_parents(self, option, parent_comment):
-        print(option.id, list(parent_comment.option.choice.keys())[0])
         if str(option.id) != list(parent_comment.option.choice.keys())[0]:
             raise BusinessLogicException(code='invalid_parent', detail='current comment does not match '
                                                                        'with the option and its parent comment')

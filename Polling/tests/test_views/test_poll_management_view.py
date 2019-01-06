@@ -107,7 +107,6 @@ class PollManagementViewTest(APITestCase):
             'username': 'test_user',
             'option': str(self.poll_option.id)
         }, format='json')
-        # print(Poll.objects.get(id=self.poll.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, 'user or poll does not exist')
         mocked_finalize_poll.assert_called_once_with(self.poll, self.poll_option)
 
