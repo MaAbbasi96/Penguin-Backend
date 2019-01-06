@@ -40,7 +40,7 @@ class PollSerializer(serializers.ModelSerializer):
             return obj.normalpolloption_set.get(final=True).value
         except NormalPollOption.DoesNotExist:
             try:
-                return obj.weeklypolloption_set.get(final=True).value
+                return str(obj.weeklypolloption_set.get(final=True))
             except WeeklyPollOption.DoesNotExist:
                 return None
 
