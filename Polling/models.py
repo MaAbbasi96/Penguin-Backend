@@ -59,7 +59,7 @@ class WeeklyPollOption(AbstractPollOption):
     end_time = models.TimeField()
 
     def __str__(self):
-        return '{}, {} to {}'.format(self.DAYS_OF_WEEK[self.weekday][1], self.start_time, self.end_time)
+        return '{}, {} تا {}'.format(self.DAYS_OF_WEEK[self.weekday][1], self.start_time, self.end_time)
 
 
 class UserPoll(models.Model):

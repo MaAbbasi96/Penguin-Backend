@@ -139,7 +139,7 @@ class PollParticipationViewTest(APITestCase):
             'message': 'hi',
             'parent_id': 0
         }, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, 'User has no access to this poll')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, 'User has no access to this poll')
         self.assertEqual(Comment.objects.filter(user=self.participated_user).count(), 1)
 
     def test_comment_user_option_doesnt_exist(self):
