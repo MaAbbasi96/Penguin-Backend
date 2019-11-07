@@ -1,5 +1,5 @@
 coverage==4.5.2
-Django==1.11
+Django==1.11.23
 django-filter==2.0.0
 djangorestframework==3.9.0
 flake8==3.6.0
