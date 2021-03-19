@@ -1,7 +1,7 @@
 coverage==4.5.2
 Django==1.11
 django-filter==2.0.0
-djangorestframework==3.9.0
+djangorestframework==3.11.2
 flake8==3.6.0
 jdate==0.0.3
 jdatetime==3.1.0
